@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, ArrowLeft, Globe, Play, Calendar, Clock, User } from 'lucide-react';
+import { Menu, X, Sun, Moon, ArrowLeft, Github, Youtube, Calendar, Clock, User } from 'lucide-react';
 import MarkdownViewer from './components/MarkdownViewer';
 
 // Dynamically import all markdown files from the content directory
@@ -98,11 +98,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
             
             <div className="hidden items-center space-x-4 sm:flex border-l border-[var(--color-border)] pl-4 ml-4">
-              <a href="https://github.com" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
-                <Globe className="h-5 w-5" />
+              <a href="https://github.com/iconstar11" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                <Github className="h-5 w-5" />
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
-                <Play className="h-5 w-5" />
+              <a href="https://www.youtube.com/@RawAnatomy_1" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                <Youtube className="h-5 w-5" />
               </a>
             </div>
             
@@ -121,8 +121,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="flex flex-col items-center justify-center h-full space-y-8 text-2xl font-display font-bold">
            <Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
            <div className="flex space-x-6 pt-4">
-              <a href="https://github.com" target="_blank" rel="noreferrer"><Globe className="h-8 w-8" /></a>
-              <a href="https://youtube.com" target="_blank" rel="noreferrer"><Play className="h-8 w-8" /></a>
+              <a href="https://github.com/iconstar11" target="_blank" rel="noreferrer"><Github className="h-8 w-8" /></a>
+              <a href="https://www.youtube.com/@RawAnatomy_1" target="_blank" rel="noreferrer"><Youtube className="h-8 w-8" /></a>
            </div>
         </div>
       </div>
