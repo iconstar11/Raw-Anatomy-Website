@@ -8,7 +8,7 @@ interface MarkdownViewerProps {
 
 const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content }) => {
   return (
-    <div className="markdown-content prose prose-invert prose-slate max-w-none lg:prose-lg prose-headings:font-bold prose-a:text-blue-400 prose-pre:bg-transparent prose-pre:p-0">
+    <div className="markdown-content">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}

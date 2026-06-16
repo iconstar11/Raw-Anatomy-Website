@@ -1,31 +1,93 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --color-bg: #f7f6f2;
+  --color-surface: #f9f8f5;
+  --color-surface-2: #fbfbf9;
+  --color-surface-offset: #f3f0ec;
+  --color-surface-offset-2: #edeae5;
+  --color-divider: #dcd9d5;
+  --color-border: #d4d1ca;
+  --color-text: #28251d;
+  --color-text-muted: #7a7974;
+  --color-text-faint: #bab9b4;
+  --color-primary: #01696f;
+  --color-primary-hover: #0c4e54;
+  --color-primary-highlight: #cedcd8;
+  --color-warning: #964219;
+  --color-success: #437a22;
+  --color-success-highlight: #d4dfcc;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  --font-display: 'Lora', Georgia, serif;
+  --font-body: 'Inter', 'Helvetica Neue', sans-serif;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+[data-theme="dark"] {
+  --color-bg: #171614;
+  --color-surface: #1c1b19;
+  --color-surface-2: #201f1d;
+  --color-surface-offset: #1d1c1a;
+  --color-surface-offset-2: #22211f;
+  --color-divider: #262523;
+  --color-border: #393836;
+  --color-text: #cdccca;
+  --color-text-muted: #797876;
+  --color-text-faint: #5a5957;
+  --color-primary: #4f98a3;
+  --color-primary-hover: #227f8b;
+  --color-primary-highlight: #313b3b;
+  --color-warning: #bb653b;
+  --color-success: #6daa45;
+  --color-success-highlight: #3a4435;
 }
 
 body {
   margin: 0;
-  min-width: 320px;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom styles for the markdown viewer */
+.markdown-content {
+  @apply prose prose-slate max-w-none;
+  font-family: var(--font-body);
+}
+
+[data-theme="dark"] .markdown-content {
+  @apply prose-invert;
+}
+
+.markdown-content h1, 
+.markdown-content h2, 
+.markdown-content h3 {
+  font-family: var(--font-display);
+  @apply font-semibold tracking-tight text-[var(--color-text)];
+}
+
+.markdown-content p {
+  @apply text-lg leading-relaxed text-[var(--color-text)];
+}
+
 .markdown-content pre {
   @apply rounded-xl border border-slate-700 bg-slate-900/50 p-0 overflow-hidden;
 }
 
 .markdown-content pre code {
   @apply block p-4 bg-transparent;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
 }

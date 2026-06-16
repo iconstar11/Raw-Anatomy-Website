@@ -1,4 +1,10 @@
-# Sample Research: AI in Modern Development
+---
+title: "Sample Research: AI in Modern Development"
+description: "Exploring how automation and AI are reshaping the modern development lifecycle."
+author: "Anton"
+date: "2026-06-16"
+readTime: "5 min read"
+---
 
 This is a sample research article demonstrating the UI of **RawAnatomy**.
 

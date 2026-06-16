@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, ChevronRight, Globe, Play } from 'lucide-react';
+import { Menu, X, Sun, Moon, ArrowLeft, Globe, Play, Calendar, Clock, User } from 'lucide-react';
 import MarkdownViewer from './components/MarkdownViewer';
 
 // Dynamically import all markdown files from the content directory
@@ -9,124 +9,175 @@ const contentFiles = import.meta.glob('./content/*.md', { query: '?raw', eager: 
 interface ArticleMetadata {
   slug: string;
   title: string;
+  description: string;
+  author: string;
+  date: string;
+  readTime: string;
   content: string;
 }
 
+// Simple Frontmatter Parser
+const parseFrontmatter = (rawContent: string) => {
+  const frontmatterRegex = /^---\r?\n([\s\S]*?)\r?\n---/;
+  const match = rawContent.match(frontmatterRegex);
+  
+  if (!match) return { metadata: {}, body: rawContent };
+  
+  const frontmatterBlock = match[1];
+  const body = rawContent.replace(match[0], '').trim();
+  const metadata: any = {};
+  
+  frontmatterBlock.split('\n').forEach(line => {
+    const [key, ...valueParts] = line.split(':');
+    if (key && valueParts.length > 0) {
+      metadata[key.trim()] = valueParts.join(':').trim().replace(/^["']|["']$/g, '');
+    }
+  });
+  
+  return { metadata, body };
+};
+
 const articles: ArticleMetadata[] = Object.entries(contentFiles).map(([path, content]) => {
   const slug = path.split('/').pop()?.replace('.md', '') || '';
-  // When using ?raw, the content is exported as { default: '...' }
-  const articleContent = (content as { default: string }).default;
-  // Simple title extraction from the first line of markdown
-  const titleLine = articleContent.split('\n').find((line: string) => line.startsWith('# '));
-  const title = titleLine ? titleLine.replace('# ', '').trim() : slug;
+  const rawContent = (content as { default: string }).default;
+  const { metadata, body } = parseFrontmatter(rawContent);
   
   return {
     slug,
-    title,
-    content: articleContent,
+    title: metadata.title || slug,
+    description: metadata.description || '',
+    author: metadata.author || 'Anonymous',
+    date: metadata.date || '',
+    readTime: metadata.readTime || '',
+    content: body,
   };
-});
+}).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') as 'light' | 'dark' || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    return 'light';
+  });
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     setIsMenuOpen(false);
+    window.scrollTo(0, 0);
   }, [location]);
 
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-200 selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-300">
       {/* Navigation */}
-      <nav className="fixed top-0 z-50 w-full border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-bold text-white">
+      <nav className="fixed top-0 z-50 w-full border-b border-[var(--color-border)] bg-[var(--color-bg)]/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] font-bold text-white transition-transform group-hover:scale-105">
               RA
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">RawAnatomy</span>
+            <span className="text-xl font-bold tracking-tight font-display">RawAnatomy</span>
           </Link>
 
-          <div className="hidden items-center space-x-6 md:flex">
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors">
-              <Globe className="h-5 w-5" />
-            </a>
-            <a href="https://youtube.com" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors">
-              <Play className="h-5 w-5" />
-            </a>
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-[var(--color-surface-offset)] transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </button>
+            
+            <div className="hidden items-center space-x-4 sm:flex border-l border-[var(--color-border)] pl-4 ml-4">
+              <a href="https://github.com" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                <Globe className="h-5 w-5" />
+              </a>
+              <a href="https://youtube.com" target="_blank" rel="noreferrer" className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors">
+                <Play className="h-5 w-5" />
+              </a>
+            </div>
+            
+            <button 
+              className="sm:hidden p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X /> : <Menu />}
+            </button>
           </div>
-
-          <button 
-            className="md:hidden p-2 text-slate-400 hover:text-white"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X /> : <Menu />}
-          </button>
         </div>
       </nav>
 
-      {/* Sidebar / Mobile Menu */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-72 transform border-r border-slate-800 bg-[#0f172a] transition-transform duration-300 ease-in-out md:translate-x-0 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex h-full flex-col pt-20 pb-6 px-4">
-          <div className="mb-4 flex items-center space-x-2 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            <BookOpen className="h-3 w-3" />
-            <span>Research Archive</span>
-          </div>
-          <nav className="flex-1 space-y-1 overflow-y-auto">
-            {articles.map((article) => (
-              <Link
-                key={article.slug}
-                to={`/a/${article.slug}`}
-                className={`group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  location.pathname === `/a/${article.slug}`
-                    ? 'bg-blue-600/10 text-blue-400'
-                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
-                }`}
-              >
-                <span className="truncate">{article.title}</span>
-                <ChevronRight className={`h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 ${location.pathname === `/a/${article.slug}` ? 'opacity-100' : ''}`} />
-              </Link>
-            ))}
-          </nav>
+      {/* Mobile Menu */}
+      <div className={`fixed inset-0 z-40 bg-[var(--color-bg)] transition-transform duration-300 sm:hidden ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
+        <div className="flex flex-col items-center justify-center h-full space-y-8 text-2xl font-display font-bold">
+           <Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
+           <div className="flex space-x-6 pt-4">
+              <a href="https://github.com" target="_blank" rel="noreferrer"><Globe className="h-8 w-8" /></a>
+              <a href="https://youtube.com" target="_blank" rel="noreferrer"><Play className="h-8 w-8" /></a>
+           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="pt-16 md:pl-72">
-        <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <main className="pt-24 pb-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
           {children}
         </div>
       </main>
-
-      {/* Overlay for mobile menu */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
+      
+      {/* Simple Footer */}
+      <footer className="border-t border-[var(--color-border)] py-10 text-center text-[var(--color-text-muted)] text-sm">
+        <p>© {new Date().getFullYear()} RawAnatomy. Evidence-based research for performance.</p>
+      </footer>
     </div>
   );
 };
 
 const Home = () => (
-  <div className="flex flex-col items-center justify-center py-20 text-center">
-    <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-white sm:text-6xl">
-      Raw Research for <span className="text-blue-500">YouTube Shorts</span>
-    </h1>
-    <p className="max-w-2xl text-lg text-slate-400">
-      Deep dives, technical breakdowns, and raw notes from my research process. 
-      Select an article from the sidebar to begin.
-    </p>
-    <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-       {articles.slice(0, 4).map(article => (
+  <div className="animate-fade-in">
+    <div className="mb-16 text-center">
+      <h1 className="mb-4 text-4xl font-bold tracking-tight font-display sm:text-6xl text-[var(--color-text)]">
+        The Anatomy of <span className="text-[var(--color-primary)]">Performance</span>
+      </h1>
+      <p className="mx-auto max-w-2xl text-lg text-[var(--color-text-muted)]">
+        Deep dives, technical breakdowns, and evidence-based reviews from my research process. 
+        Raw data, formatted for clarity.
+      </p>
+    </div>
+    
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+       {articles.map(article => (
          <Link 
            key={article.slug} 
            to={`/a/${article.slug}`}
-           className="flex flex-col items-start rounded-2xl border border-slate-800 bg-slate-900/50 p-6 transition-all hover:border-blue-500/50 hover:bg-slate-900"
+           className="flex flex-col h-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 transition-all hover:border-[var(--color-primary)] hover:shadow-lg group"
          >
-           <span className="mb-2 text-xs font-bold text-blue-500 uppercase">Latest Research</span>
-           <h3 className="text-xl font-bold text-white">{article.title}</h3>
+           <div className="flex items-center space-x-4 mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--color-primary)]">
+             <Calendar className="h-3 w-3" />
+             <span>{article.date}</span>
+             <span className="text-[var(--color-divider)]">•</span>
+             <Clock className="h-3 w-3" />
+             <span>{article.readTime}</span>
+           </div>
+           <h3 className="text-2xl font-bold font-display text-[var(--color-text)] mb-3 group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
+             {article.title}
+           </h3>
+           <p className="text-[var(--color-text-muted)] line-clamp-3 mb-6 flex-grow leading-relaxed">
+             {article.description}
+           </p>
+           <div className="flex items-center text-sm font-bold text-[var(--color-primary)] mt-auto">
+             Read Full Review
+             <ArrowLeft className="ml-2 h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
+           </div>
          </Link>
        ))}
     </div>
@@ -139,14 +190,46 @@ const ArticleView = () => {
 
   if (!article) {
     return (
-      <div className="py-20 text-center">
-        <h2 className="text-2xl font-bold text-white">Article not found</h2>
-        <Link to="/" className="mt-4 inline-block text-blue-500 hover:underline">Return home</Link>
+      <div className="py-20 text-center animate-fade-in">
+        <h2 className="text-2xl font-bold font-display text-[var(--color-text)]">Review not found</h2>
+        <Link to="/" className="mt-4 inline-flex items-center text-[var(--color-primary)] hover:underline">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Return home
+        </Link>
       </div>
     );
   }
 
-  return <MarkdownViewer content={article.content} />;
+  return (
+    <article className="animate-fade-in max-w-3xl mx-auto">
+      <header className="mb-12 border-b border-[var(--color-border)] pb-12 text-center">
+        <div className="flex items-center justify-center space-x-4 mb-6 text-sm font-semibold uppercase tracking-widest text-[var(--color-primary)]">
+          <span>{article.date}</span>
+          <span className="text-[var(--color-divider)]">/</span>
+          <span>{article.readTime}</span>
+        </div>
+        <h1 className="mb-6 text-4xl font-bold tracking-tight font-display sm:text-5xl lg:text-6xl text-[var(--color-text)]">
+          {article.title}
+        </h1>
+        <p className="text-xl text-[var(--color-text-muted)] leading-relaxed italic mb-8">
+          {article.description}
+        </p>
+        <div className="flex items-center justify-center space-x-3 text-sm text-[var(--color-text-muted)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-surface-offset)]">
+            <User className="h-4 w-4" />
+          </div>
+          <span>By <strong>{article.author}</strong></span>
+        </div>
+      </header>
+      
+      <MarkdownViewer content={article.content} />
+      
+      <footer className="mt-20 pt-12 border-t border-[var(--color-border)]">
+        <Link to="/" className="inline-flex items-center text-[var(--color-primary)] font-bold hover:underline">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Research Archive
+        </Link>
+      </footer>
+    </article>
+  );
 };
 
 function App() {
