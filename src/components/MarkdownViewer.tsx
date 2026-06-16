@@ -12,6 +12,11 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ content }) => {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
+        components={{
+          a: ({ node, ...props }) => (
+            <a {...props} target="_blank" rel="noopener noreferrer" />
+          ),
+        }}
       >
         {content}
       </ReactMarkdown>
