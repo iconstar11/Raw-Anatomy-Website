@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, ArrowLeft, Github, Youtube, Calendar, Clock, User } from 'lucide-react';
+import { Menu, X, Sun, Moon, ArrowLeft, Calendar, Clock, User } from 'lucide-react';
 import MarkdownViewer from './components/MarkdownViewer';
 
 // Dynamically import all markdown files from the content directory
