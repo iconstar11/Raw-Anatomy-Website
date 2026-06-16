@@ -14,7 +14,8 @@ interface ArticleMetadata {
 
 const articles: ArticleMetadata[] = Object.entries(contentFiles).map(([path, content]) => {
   const slug = path.split('/').pop()?.replace('.md', '') || '';
-  const articleContent = content as string;
+  // When using ?raw, the content is exported as { default: '...' }
+  const articleContent = (content as { default: string }).default;
   // Simple title extraction from the first line of markdown
   const titleLine = articleContent.split('\n').find((line: string) => line.startsWith('# '));
   const title = titleLine ? titleLine.replace('# ', '').trim() : slug;
